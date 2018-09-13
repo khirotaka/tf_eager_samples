@@ -21,6 +21,7 @@ from tensorflow.train import AdamOptimizer
 from tensorflow.layers import flatten
 from tensorflow.nn import relu
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 import utils
 
 
@@ -61,23 +62,29 @@ if __name__ == '__main__':
 
     (x_train, y_train), (x_test, y_test) = load_data()
 
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.1)
     x_train = x_train.astype("float32")
     x_test = x_test.astype("float32")
+    x_val = x_val.astype("float32")
+
     print(x_test.shape)
     x_train /= 255
     x_test /= 255
+    x_val /= 255
 
     y_train = to_categorical(y_train, num_classes)
     y_test = to_categorical(y_test, num_classes)
+    y_val = to_categorical(y_val, num_classes)
 
-    train_ds = Dataset.from_tensor_slices((x_train, y_train)).shuffle(60000).batch(batch_size)
+    train_ds = Dataset.from_tensor_slices((x_train, y_train)).shuffle(45000).batch(batch_size)
     test_ds = Dataset.from_tensor_slices((x_test, y_test)).shuffle(10000).batch(batch_size)
+    val_ds = Dataset.from_tensor_slices((x_val, y_val)).shuffle(500).batch(batch_size)
 
     model = Net()
     optimizer = AdamOptimizer()
 
     # If you have a gpu on your computer, specify device="gpu:0".
-    utils.train(model, optimizer, train_ds, epochs, device="cpu:0")
+    utils.train(model, optimizer, train_ds, val_ds,epochs, device="cpu:0")
     utils.test(model, test_ds, device="cpu:0")
 
     class_name = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
