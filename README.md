@@ -10,10 +10,10 @@ TensorFlow Eager Execution samples (for me 😁)
  - [utils](https://github.com/KawashimaHirotaka/tf_eager_samples/blob/master/samples/utils.py)
  
  It contains the following functions.
- 
-    `loss`    : calculate loss
-    `grad`    : calculate gradients
-    `train`   : train function
-    `test`    : test function
-    `predict` : prediction
-    
+ ```
+    loss    : calculate loss
+    grad    : calculate gradients
+    train   : train function
+    test    : test function
+    predict : prediction
+```
