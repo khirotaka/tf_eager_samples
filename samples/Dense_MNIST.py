@@ -4,9 +4,9 @@ TensorFlow Eager Execution
 MNIST using dense neural network
 
 
-Required: TensorFlow 1.10.1
+Required: Python 3.6
+          TensorFlow 1.10.1
           Matplotlib 2.2.3
-
 
 
 Copyright (c) 2018 Hirotaka Kawashima
