@@ -24,21 +24,28 @@ def grad(model, x, y, training=False):
     return tape.gradient(loss_value, model.variables)
 
 
-def train(model, optimizer, dataset, epochs, device="cpu:0"):
+def train(model, optimizer, train_ds, val_ds, epochs, device="cpu:0"):
     with tf.device(device):
         for e in range(epochs):
             epoch_loss_avg = tfe.metrics.Mean()
             train_accuracy = tfe.metrics.Accuracy()
+            val_accuracy = tfe.metrics.Accuracy()
 
-            x, y = iter(dataset).next()
-            for (i, (x, y)) in enumerate(dataset):
+            x, y = iter(train_ds).next()
+
+            for (i, (x, y)) in enumerate(train_ds):
                 grads = grad(model, x, y, training=True)
                 optimizer.apply_gradients(zip(grads, model.variables), global_step=tf.train.get_or_create_global_step())
                 train_accuracy(tf.argmax(model(x), axis=1, output_type=tf.int32),
-                           tf.argmax(y, axis=1, output_type=tf.int32))
+                               tf.argmax(y, axis=1, output_type=tf.int32))
 
                 if i % 200 == 0:
-                    print("Loss: {:.4f} - Acc: {:.4f}".format(epoch_loss_avg(loss(model, x, y)), train_accuracy.result()))
+                    for (x_val, y_val) in val_ds:
+                        val_accuracy(tf.argmax(model(x_val), axis=1, output_type=tf.int32),
+                                     tf.argmax(y_val, axis=1, output_type=tf.int32))
+                    print("Loss: {:.4f} - Acc: {:.4f} | Val Acc: {:.4f}".format(
+                        epoch_loss_avg(loss(model, x, y)), train_accuracy.result(), val_accuracy.result()
+                    ))
 
             print("-"*50)
             print("Epochs {} / {} | Loss: {:.4f} - Accuracy: {:.3%}".format(
